@@ -2,3 +2,4 @@
 cmake-build-debug/
 CMakeLists.txt
 philo
+prod_conso
