@@ -1,83 +1,130 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #include <semaphore.h>
 
-#define NProd 3
-#define NConso 3
-// à mettre dans le cmd
+// cmd arguments
+int n_prod;
+int n_conso;
 
-#define N 8
+// Final non-moving sizes
+#define BUFFER_SIZE 8
+#define DATA_SIZE 10000
+
+// Semaphores
 pthread_mutex_t mutex;
 sem_t empty;
 sem_t full;
 
+// Threads
+pthread_t* prod;
+pthread_t* conso;
+
+// Buffer, counters
+int* buffer;
 int in_index = 0;
 int out_index = 0;
-int buffer[N];
+int produced = DATA_SIZE;
+int consumed = DATA_SIZE;
 
-// Producteur
-void* producer(void* pro) {
+// Producer
+void* producer() {
     int item;
-    for (int i = 0; i < 10; i++) {
+    while (1) {
         item = rand(); // produce random int
-        sem_wait(&empty); // wait for free slots in_index buffer
+        // wait
+        sem_wait(&empty);
         pthread_mutex_lock(&mutex);
-        // section critique
-        buffer[in_index] = item;
-        printf("Producteur %d: inserted item %d at slot %d\n", *(int*) pro, buffer[in_index], in_index);
-        in_index = (in_index + 1) % N; // update index
+        // break condition
+        if (produced == 0) {
+            sem_post(&empty);
+            sem_post(&full);
+            pthread_mutex_unlock(&mutex);
+            break;
+        }
+        // debug
+        printf("Producer inserted item at slot %d\n", in_index % BUFFER_SIZE);
+        // insert item in buffer
+        buffer[in_index % BUFFER_SIZE] = item;
+        in_index++;
+        // update producer counter
+        produced--;
+        // restart
         pthread_mutex_unlock(&mutex);
-        sem_post(&full); // post that a slot has been filled
+        sem_post(&full);
     }
 }
 
-// Consommateur
-void* consumer(void* con) {
-    for (int i = 0; i < 10; i++) {
-        sem_wait(&full); // wait for empty slots
+// Consumer
+void* consumer() {
+    while (1) {
+        // wait
+        sem_wait(&full);
         pthread_mutex_lock(&mutex);
-        // section critique
-        int item = buffer[out_index];
-        printf("Consumer %d: removed item %d from slot %d\n", *(int*) con, item, out_index);
-        out_index = (out_index + 1) % N; // update index
+        // break condition
+        if (consumed == 0) {
+            sem_post(&full);
+            sem_post(&empty);
+            pthread_mutex_unlock(&mutex);
+            break;
+        }
+        // debug
+        printf("Consumer removed item from slot %d\n", out_index % BUFFER_SIZE);
+        // update consumer counter
+        consumed--;
+        // remove item from buffer
+        buffer[out_index % BUFFER_SIZE] = 0;
+        out_index++;
+        // restart
         pthread_mutex_unlock(&mutex);
-        sem_post(&empty); // post that a slot has been filled
+        sem_post(&empty);
     }
 }
 
 int main(int argc, char* argv[]) {
-    printf("Hello there !\n");
+    // Get cmd args
+    n_prod = atoi(argv[1]);
+    n_conso = atoi(argv[2]);
 
-    pthread_t pro[8], con[8];
+    // Allocate memory for threads and buffer
+    buffer = malloc(sizeof(int) * BUFFER_SIZE);
+    if (buffer == NULL) return -1;
+    prod = malloc(sizeof(pthread_t) * n_prod);
+    if (prod == NULL) return -1;
+    conso = malloc(sizeof(pthread_t) * n_conso);
+    if (conso == NULL) return -1;
 
+    // Initialize semaphores
     pthread_mutex_init(&mutex, NULL);
-    sem_init(&empty, 0, N);
+    sem_init(&empty, 0, BUFFER_SIZE);
     sem_init(&full, 0, 0);
 
-    int a[8] = {1,2,3,4,5,6,7,8};
-
-    for (int i = 0; i < NProd; i++) {
-        pthread_create(&pro[i], NULL, producer, &a[i]);
+    // Threads for producing
+    for (int i = 0; i < n_prod; i++) {
+        pthread_create(&prod[i], NULL, producer, NULL);
     }
-    for (int i = 0; i < NConso; i++) {
-        pthread_create(&con[i], NULL, consumer, &a[i]);
-    }
-
-    for (int i = 0; i < NProd; i++) {
-        pthread_join(pro[i], NULL);
-    }
-    for (int i = 0; i < NConso; i++) {
-        pthread_join(con[i], NULL);
+    // Threads for consuming
+    for (int i = 0; i < n_conso; i++) {
+        pthread_create(&conso[i], NULL, consumer, NULL);
     }
 
+    // Join threads
+    for (int i = 0; i < n_prod; i++) {
+        pthread_join(prod[i], NULL);
+    }
+    for (int i = 0; i < n_conso; i++) {
+        pthread_join(conso[i], NULL);
+    }
+
+    // Destroy and free
     pthread_mutex_destroy(&mutex);
     sem_destroy(&empty);
     sem_destroy(&full);
+    free(prod);
+    free(conso);
 
     return 0;
 }
