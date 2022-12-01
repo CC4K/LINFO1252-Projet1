@@ -13,6 +13,12 @@ int n_readers;
 
 #define BUFFER_SIZE 8
 int* buffer;
+
+pthread_t* ecrivain;
+pthread_t* lecteur;
+
+
+
 pthread_mutex_t mutex_readcount; // Protège readcount
 pthread_mutex_t mutex_writercount; // Protège writecount
 
@@ -87,12 +93,26 @@ int main(int argc, char* argv[]) {
 
     buffer = malloc(sizeof(int) * BUFFER_SIZE);
     if (buffer == NULL) return -1;
-    writer = malloc(sizeof(pthread_t) * n_writer);
-    if (writer == NULL) return -1;
-    reader = malloc(sizeof(pthread_t) * reader);
-    if (reader == NULL) return -1;
+    ecrivain = malloc(sizeof(pthread_t) * n_writer);
+    if (ecrivain == NULL) return -1;
+    lecteur = malloc(sizeof(pthread_t) * n_readers);
+    if (lecteur == NULL) return -1;
 
 
     sem_init(&wsem,0,1);
     sem_init(&rsem,0,1);
+
+    for (int i = 0; i < n_writer; i++) {
+        pthread_create(&ecrivain[i], NULL, writer, NULL);
+    }
+
+    for (int i = 0; i < n_readers; i++) {
+        pthread_create(&lecteur[i], NULL, reader, NULL);
+    }
+    for (int i = 0; i < n_writer; i++) {
+        pthread_join(ecrivain[i], NULL);
+    }
+    for (int i = 0; i < n_readers; ++i) {
+        pthread_join(lecteur[i],NULL);
+    }
 }
