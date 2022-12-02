@@ -2,14 +2,16 @@
 
 ## Partie 1 - TODO
 
--reader-writer (tout)
+-reader-writer : le faire fonctionner
 
--producer-consumer (vérifier sortie + entrée cmd)
+-producer-consumer : ajouter boucle for pour simuler travail
 
--graphes (tout)
+-graphes : reprendre script bash et Python TD
 
 ## Partie 2 - TODO
 
 -LOL
 
 -LOL^2
+
+-LOL^3
