@@ -30,6 +30,14 @@ int out_index = 0;
 int produced = DATA_SIZE;
 int consumed = DATA_SIZE;
 
+// CPU working simulator
+void CPU_go_brrrr() {
+    int entier;
+    for (int i = 0; i < 10000; i++) {
+        entier++;
+    }
+}
+
 // Producer
 void* producer() {
     int item;
@@ -55,6 +63,8 @@ void* producer() {
         // restart
         pthread_mutex_unlock(&mutex);
         sem_post(&full);
+        // simulate CPU working
+        CPU_go_brrrr();
     }
 }
 
@@ -81,6 +91,8 @@ void* consumer() {
         // restart
         pthread_mutex_unlock(&mutex);
         sem_post(&empty);
+        // simulate CPU working
+        CPU_go_brrrr();
     }
 }
 
