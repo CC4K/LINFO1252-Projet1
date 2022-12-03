@@ -9,6 +9,9 @@ prod-conso: producer_consumer.c
 read-write: reader_writer.c
 	gcc reader_writer.c -lpthread -o read-write_exe.o
 
+run:
+	./thread_testing_script
+
 clean:
 	rm -rf *.o
 
