@@ -1,13 +1,13 @@
-all: philo prod-conso read-write
+all: philo prod_conso read_write
 
-philo: philosophers.c
-	gcc philosophers.c -lpthread -o philo_exe.o
+philo: philosophes.c
+	gcc philosophes.c -lpthread -o philosophes_exe.o
 
-prod-conso: producer_consumer.c
-	gcc producer_consumer.c -lpthread -o prod-conso_exe.o
+prod_conso: producteurs_consommateurs.c
+	gcc producteurs_consommateurs.c -lpthread -o producteurs_consommateurs_exe.o
 
-read-write: reader_writer.c
-	gcc reader_writer.c -lpthread -o read-write_exe.o
+read_write: lecteurs_ecrivains.c
+	gcc lecteurs_ecrivains.c -lpthread -o lecteurs_ecrivains_exe.o
 
 run:
 	./thread_testing_script
@@ -16,11 +16,12 @@ clean:
 	rm -rf *.o
 
 help:
-	@echo \> 'make help' \	\  \: show this list of commands
-	@echo \> 'make all'  \  \  \  \ : compiles all files
-	@echo \> 'make philo' \	 \ : compiles philosophers program
-	@echo \> 'make prod-conso' \: compiles producer-consumer program
-	@echo \> 'make read-write'\ : compiles readers-writers program
-	@echo \> 'make clean'\   \   \  : cleans object files
+	@echo \> 'make help' \	\  \: shows this list of commands
+	@echo \> 'make all'  \  \  \  \ : compiles all .c files
+	@echo \> 'make philo' \	 \ : compiles philosophes.c
+	@echo \> 'make prod-conso' \: compiles producteurs_consommateurs.c
+	@echo \> 'make read-write'\ : compiles lecteurs_ecrivains.c
+	@echo \> 'make run'\  \  \  \  : tests the 3 programs and writes resulting times \in csv files
+	@echo \> 'make clean'\   \   \  : removes generated object files
 
 .PHONY: clean

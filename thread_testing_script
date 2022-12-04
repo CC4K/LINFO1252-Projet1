@@ -1,32 +1,31 @@
 #!/usr/bin/bash
-#echo "Données pour philosophes:" > philosophes.csv
-echo "Données pour producteurs-consommateurs:" > producteurs-consommateurs.csv
-#echo "Données pour lecteurs-ecrivains:" > lecteurs-ecrivains.csv
+echo "Philos,1,2,3,4,5" > philosophes.csv
+echo "Prod-conso,1,2,3,4,5" > producteurs_consommateurs.csv
+echo "Lect-ecriv,1,2,3,4,5" > lecteurs_ecrivains.csv
 for n in $(seq 12); do
+    echo -n "$n," >> philosophes.csv
+    echo -n "$n," >> producteurs_consommateurs.csv
+    echo -n "$n," >> lecteurs_ecrivains.csv
 	for i in $(seq 5); do
 		echo "$n / $i"
 		if [ $(($n%2)) -eq 0 ]; then
-			time_prod_conso=$(/usr/bin/time -f "%e" ./prod-conso_exe.o $n $n 2>&1 | tail -n 1)
-			#time_read_write=$(/usr/bin/time -f "%e" ./read-write_exe.o $n $n 2>&1 | tail -n 1)
+			time_prod_conso=$(/usr/bin/time -f "%e" ./producteurs_consommateurs_exe.o $n $n 2>&1 | tail -n 1)
+			#time_read_write=$(/usr/bin/time -f "%e" ./lecteurs_ecrivains_exe.o $n $n 2>&1 | tail -n 1)
 		else
 			m=$(($n+1))
-			time_prod_conso=$(/usr/bin/time -f "%e" ./prod-conso_exe.o $n $m 2>&1 | tail -n 1)
-			#time_read_write=$(/usr/bin/time -f "%e" ./read-write_exe.o $m $n 2>&1 | tail -n 1)
+			time_prod_conso=$(/usr/bin/time -f "%e" ./producteurs_consommateurs_exe.o $n $m 2>&1 | tail -n 1)
+			#time_read_write=$(/usr/bin/time -f "%e" ./lecteurs_ecrivains_exe.o $m $n 2>&1 | tail -n 1)
 		fi
-		#if [ $n -eq 1 ]; then
-			#time_philo=0
-		#else
-			#time_philo=$(/usr/bin/time -f "%e" ./philo_exe.o $n 2>&1 | tail -n 1)
-		#fi
-		
+		time_philo=$(/usr/bin/time -f "%e" ./philosophes_exe.o $n 2>&1 | tail -n 1)
+
 		if [ $i -eq 5 ]; then
-            #echo $time_philo >> philosophes.csv
-			echo $time_prod_conso >> producteurs-consommateurs.csv
-			#echo $time_read_write >> lecteurs-ecrivains.csv
+            echo $time_philo >> philosophes.csv
+			echo $time_prod_conso >> producteurs_consommateurs.csv
+			#echo $time_read_write >> lecteurs_ecrivains.csv
         else
-        	#echo -n "$time_philo," >> philosophes.csv
-			echo -n "$time_prod_conso," >> producteurs-consommateurs.csv
-			#echo -n "$time_read_write," >> lecteurs-ecrivains.csv
+        	echo -n "$time_philo," >> philosophes.csv
+			echo -n "$time_prod_conso," >> producteurs_consommateurs.csv
+			#echo -n "$time_read_write," >> lecteurs_ecrivains.csv
         fi
 	done
 done

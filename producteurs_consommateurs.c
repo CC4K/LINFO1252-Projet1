@@ -6,20 +6,15 @@
 #include <string.h>
 #include <semaphore.h>
 
-// cmd arguments
-int n_prod;
-int n_conso;
-
-// Final non-moving sizes
 #define BUFFER_SIZE 8
 #define DATA_SIZE 10000
 
-// Semaphores
+// Global variables
+int n_prod; // given by user
+int n_conso; // given by user
 pthread_mutex_t mutex;
 sem_t empty;
 sem_t full;
-
-// Threads
 pthread_t* prod;
 pthread_t* conso;
 
@@ -29,6 +24,11 @@ int in_index = 0;
 int out_index = 0;
 int produced = DATA_SIZE;
 int consumed = DATA_SIZE;
+
+void error(int err, char* msg) {
+    fprintf(stderr, "Error %d : %s\n", err, msg);
+    exit(EXIT_FAILURE);
+}
 
 // CPU working simulator
 void CPU_go_brrrr() {
@@ -54,7 +54,7 @@ void* producer() {
             break;
         }
         // debug
-        printf("Producer inserted item at slot %d\n", in_index % BUFFER_SIZE);
+//        printf("Producer inserted item at slot %d\n", in_index % BUFFER_SIZE);
         // insert item in buffer
         buffer[in_index % BUFFER_SIZE] = item;
         in_index++;
@@ -82,7 +82,7 @@ void* consumer() {
             break;
         }
         // debug
-        printf("Consumer removed item from slot %d\n", out_index % BUFFER_SIZE);
+//        printf("Consumer removed item from slot %d\n", out_index % BUFFER_SIZE);
         // update consumer counter
         consumed--;
         // remove item from buffer
@@ -98,6 +98,9 @@ void* consumer() {
 
 int main(int argc, char* argv[]) {
     // Get cmd args
+    if (argc != 3) {
+        error(-2, "Exactly 2 arguments are required");
+    }
     n_prod = atoi(argv[1]);
     n_conso = atoi(argv[2]);
 
@@ -137,6 +140,7 @@ int main(int argc, char* argv[]) {
     sem_destroy(&full);
     free(prod);
     free(conso);
+    free(buffer);
 
     return 0;
 }
