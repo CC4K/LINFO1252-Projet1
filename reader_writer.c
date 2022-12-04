@@ -7,20 +7,18 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
+#include <errno.h>
+
+#define Nw 640
+#define Nr 2560
 
 int n_writer;
 int n_readers;
 
-#define BUFFER_SIZE 8
-int* buffer;
-
-pthread_t* ecrivain;
-pthread_t* lecteur;
-
-
 
 pthread_mutex_t mutex_readcount; // Protège readcount
 pthread_mutex_t mutex_writercount; // Protège writecount
+pthread_mutex_t z;
 
 sem_t wsem; //Accès exclusif à la db
 sem_t rsem; //Pour bloquer des readers
@@ -28,7 +26,8 @@ sem_t rsem; //Pour bloquer des readers
 int readcount=0;
 int writecount=0;
 
-
+pthread_t* lecteur;
+pthread_t* ecrivain;
 
 
 void write_data(){
@@ -38,7 +37,7 @@ void read_database(){
     for (int i=0; i<10000; i++);
 }
 
-void writer(){
+void* writer(){
     while(true){
 
 
@@ -65,8 +64,9 @@ void writer(){
     }
 
 }
-void reader(){
+void* reader(){
     while(true){
+        pthread_mutex_lock(z);
         sem_wait(&rsem);
         pthread_mutex_lock(&mutex_readcount);
         readcount=readcount+1;
@@ -75,6 +75,8 @@ void reader(){
         }
         pthread_mutex_unlock(&mutex_readcount);
         sem_post(&rsem);
+        pthread_mutex_unlock(z);
+
         read_database();
 
         pthread_mutex_lock(&mutex_readcount);
@@ -91,8 +93,7 @@ int main(int argc, char* argv[]) {
     n_writer = atoi(argv[1]);
     n_readers = atoi(argv[2]);
 
-    buffer = malloc(sizeof(int) * BUFFER_SIZE);
-    if (buffer == NULL) return -1;
+
     ecrivain = malloc(sizeof(pthread_t) * n_writer);
     if (ecrivain == NULL) return -1;
     lecteur = malloc(sizeof(pthread_t) * n_readers);
@@ -115,4 +116,11 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < n_readers; ++i) {
         pthread_join(lecteur[i],NULL);
     }
+    sem_destroy(&wsem);
+    sem_destroy(&rsem);
+    free(ecrivain);
+    free(lecteur);
+
+    return 0;
+
 }
