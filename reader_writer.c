@@ -18,7 +18,7 @@ int n_readers;
 
 pthread_mutex_t mutex_readcount; // Protège readcount
 pthread_mutex_t mutex_writercount; // Protège writecount
-pthread_mutex_t z;
+
 
 sem_t wsem; //Accès exclusif à la db
 sem_t rsem; //Pour bloquer des readers
@@ -66,7 +66,7 @@ void* writer(){
 }
 void* reader(){
     while(true){
-        pthread_mutex_lock(z);
+
         sem_wait(&rsem);
         pthread_mutex_lock(&mutex_readcount);
         readcount=readcount+1;
@@ -75,7 +75,7 @@ void* reader(){
         }
         pthread_mutex_unlock(&mutex_readcount);
         sem_post(&rsem);
-        pthread_mutex_unlock(z);
+
 
         read_database();
 
