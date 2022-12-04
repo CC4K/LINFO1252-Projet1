@@ -1,6 +1,4 @@
 .idea/
 cmake-build-debug/
 CMakeLists.txt
-philo_exe.o
-prod-conso_exe.o
-read-write_exe.o
+*.o
