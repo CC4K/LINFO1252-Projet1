@@ -2,16 +2,18 @@
 
 ## Partie 1 - TODO
 
--reader-writer : le faire fonctionner
+-script python : terminer et ajouter les 2 autres programmes
 
--producer-consumer : ajouter boucle for pour simuler travail
+-script bash : ajouter et tester lecteurs_ecrivains
 
--graphes : reprendre script bash et Python TD
+-graphes : les ajouter au rapport
 
 ## Partie 2 - TODO
 
--LOL
+-test-and-set + perf
 
--LOL^2
+-test-and-test-and-set + perf
 
--LOL^3
+-interface sémaphore ??? (what)
+
+-plus tard mdr
