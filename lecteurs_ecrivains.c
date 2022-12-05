@@ -1,126 +1,144 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <unistd.h>
 #include <pthread.h>
-#include <semaphore.h>
-#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <errno.h>
+#include <string.h>
+#include <semaphore.h>
 
-#define Nw 640
-#define Nr 2560
+// Global variables
+int n_writer; // given by user
+int n_reader; // given by user
+pthread_mutex_t mutex_writecount;
+pthread_mutex_t mutex_readcount;
+sem_t wsem;
+sem_t rsem;
+pthread_t* th_writer;
+pthread_t* th_reader;
+// counters
+int readcount = 0;
+int writecount = 0;
+int lu = 0;
+int ecrit = 0;
 
-int n_writer;
-int n_readers;
-
-
-pthread_mutex_t mutex_readcount; // Protège readcount
-pthread_mutex_t mutex_writercount; // Protège writecount
-
-
-sem_t wsem; //Accès exclusif à la db
-sem_t rsem; //Pour bloquer des readers
-
-int readcount=0;
-int writecount=0;
-
-pthread_t* lecteur;
-pthread_t* ecrivain;
-
-
-void write_data(){
-    for (int i=0; i<10000; i++);
-}
-void read_database(){
-    for (int i=0; i<10000; i++);
+void error(int err, char* msg) {
+    fprintf(stderr, "Error %d : %s\n", err, msg);
+    exit(EXIT_FAILURE);
 }
 
-void* writer(){
-    while(true){
+// CPU working simulator
+void CPU_go_brrrr() {
+    for (int i = 0; i < 10000; i++);
+}
 
-
-        pthread_mutex_lock(&mutex_writercount);
-
-        writecount=writecount+1;
-        if (writecount ==1){
+void* writer() {
+    while (1) {
+        pthread_mutex_lock(&mutex_writecount);
+        // check counter
+//        printf("writer is writing / ecrit = %d\n", ecrit);
+        ecrit++;
+        // break condition
+        if (ecrit > 640) {
+            pthread_mutex_unlock(&mutex_writecount);
+            break;
+        }
+        writecount++;
+        if (writecount == 1) {
             sem_wait(&rsem);
         }
-        pthread_mutex_unlock(&mutex_writercount);
-
+        pthread_mutex_unlock(&mutex_writecount);
 
         sem_wait(&wsem);
-        write_data();
+        CPU_go_brrrr();
         sem_post(&wsem);
 
-        pthread_mutex_lock(&mutex_writercount);
-        writecount=writecount-1;
-        if (writecount==0){
+        pthread_mutex_lock(&mutex_writecount);
+        writecount--;
+        if (writecount == 0) {
             sem_post(&rsem);
         }
-        pthread_mutex_unlock(&mutex_writercount);
-
+        pthread_mutex_unlock(&mutex_writecount);
     }
 
 }
-void* reader(){
-    while(true){
 
+void* reader() {
+    while (1) {
         sem_wait(&rsem);
         pthread_mutex_lock(&mutex_readcount);
-        readcount=readcount+1;
-        if(readcount==1){
+        // check counter
+//        printf("reader is reading / lu = %d\n", lu);
+        lu++;
+        // break condition
+        if (lu > 2560) {
+            sem_post(&rsem);
+            pthread_mutex_unlock(&mutex_readcount);
+            break;
+        }
+        readcount++;
+        if (readcount == 1) {
             sem_wait(&wsem);
         }
         pthread_mutex_unlock(&mutex_readcount);
+
         sem_post(&rsem);
-
-
-        read_database();
+        CPU_go_brrrr();
 
         pthread_mutex_lock(&mutex_readcount);
-        readcount=readcount-1;
-        if(readcount==0){
+        readcount--;
+        if (readcount == 0) {
             sem_post(&wsem);
         }
         pthread_mutex_unlock(&mutex_readcount);
     }
 
 }
+
 int main(int argc, char* argv[]) {
-
+    // Get cmd args
+    if (argc != 3) {
+        error(-2, "Exactly 2 arguments are required");
+    }
     n_writer = atoi(argv[1]);
-    n_readers = atoi(argv[2]);
+    n_reader = atoi(argv[2]);
+
+    // Allocate memory for threads
+    th_writer = malloc(sizeof(pthread_t) * n_writer);
+    if (th_writer == NULL) return -1;
+    th_reader = malloc(sizeof(pthread_t) * n_reader);
+    if (th_reader == NULL) return -1;
 
 
-    ecrivain = malloc(sizeof(pthread_t) * n_writer);
-    if (ecrivain == NULL) return -1;
-    lecteur = malloc(sizeof(pthread_t) * n_readers);
-    if (lecteur == NULL) return -1;
+    // Initialize semaphores and mutex
+    pthread_mutex_init(&mutex_writecount, NULL);
+    pthread_mutex_init(&mutex_readcount, NULL);
+    sem_init(&wsem, 0, 1);
+    sem_init(&rsem, 0, 1);
 
-
-    sem_init(&wsem,0,1);
-    sem_init(&rsem,0,1);
-
+    // Create th_writer thread
     for (int i = 0; i < n_writer; i++) {
-        pthread_create(&ecrivain[i], NULL, writer, NULL);
+        pthread_create(&th_writer[i], NULL, writer, NULL);
+    }
+    // Create th_reader thread
+    for (int i = 0; i < n_reader; i++) {
+        pthread_create(&th_reader[i], NULL, reader, NULL);
     }
 
-    for (int i = 0; i < n_readers; i++) {
-        pthread_create(&lecteur[i], NULL, reader, NULL);
-    }
+    // Join threads
     for (int i = 0; i < n_writer; i++) {
-        pthread_join(ecrivain[i], NULL);
+        pthread_join(th_writer[i], NULL);
     }
-    for (int i = 0; i < n_readers; ++i) {
-        pthread_join(lecteur[i],NULL);
+    for (int i = 0; i < n_reader; i++) {
+        pthread_join(th_reader[i], NULL);
     }
+
+    // Destroy and free
+    pthread_mutex_destroy(&mutex_writecount);
+    pthread_mutex_destroy(&mutex_readcount);
     sem_destroy(&wsem);
     sem_destroy(&rsem);
-    free(ecrivain);
-    free(lecteur);
+    free(th_writer);
+    free(th_reader);
 
     return 0;
-
 }

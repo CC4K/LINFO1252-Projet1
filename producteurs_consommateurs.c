@@ -6,9 +6,6 @@
 #include <string.h>
 #include <semaphore.h>
 
-#define BUFFER_SIZE 8
-#define DATA_SIZE 10000
-
 // Global variables
 int n_prod; // given by user
 int n_conso; // given by user
@@ -17,13 +14,12 @@ sem_t empty;
 sem_t full;
 pthread_t* prod;
 pthread_t* conso;
-
-// Buffer, counters
+// buffer, counters
 int* buffer;
 int in_index = 0;
 int out_index = 0;
-int produced = DATA_SIZE;
-int consumed = DATA_SIZE;
+int produced = 8192;
+int consumed = 8192;
 
 void error(int err, char* msg) {
     fprintf(stderr, "Error %d : %s\n", err, msg);
@@ -32,14 +28,11 @@ void error(int err, char* msg) {
 
 // CPU working simulator
 void CPU_go_brrrr() {
-    int entier;
-    for (int i = 0; i < 10000; i++) {
-        entier++;
-    }
+    for (int i = 0; i < 10000; i++);
 }
 
 // Producer
-void* producer() {
+void* th_producer() {
     int item;
     while (1) {
         item = rand(); // produce random int
@@ -56,9 +49,9 @@ void* producer() {
         // debug
 //        printf("Producer inserted item at slot %d\n", in_index % BUFFER_SIZE);
         // insert item in buffer
-        buffer[in_index % BUFFER_SIZE] = item;
+        buffer[in_index % 8] = item;
         in_index++;
-        // update producer counter
+        // update th_producer counter
         produced--;
         // restart
         pthread_mutex_unlock(&mutex);
@@ -69,7 +62,7 @@ void* producer() {
 }
 
 // Consumer
-void* consumer() {
+void* th_consumer() {
     while (1) {
         // wait
         sem_wait(&full);
@@ -83,10 +76,10 @@ void* consumer() {
         }
         // debug
 //        printf("Consumer removed item from slot %d\n", out_index % BUFFER_SIZE);
-        // update consumer counter
+        // update th_consumer counter
         consumed--;
         // remove item from buffer
-        buffer[out_index % BUFFER_SIZE] = 0;
+        buffer[out_index % 8] = 0;
         out_index++;
         // restart
         pthread_mutex_unlock(&mutex);
@@ -105,25 +98,25 @@ int main(int argc, char* argv[]) {
     n_conso = atoi(argv[2]);
 
     // Allocate memory for threads and buffer
-    buffer = malloc(sizeof(int) * BUFFER_SIZE);
+    buffer = malloc(sizeof(int) * 8);
     if (buffer == NULL) return -1;
     prod = malloc(sizeof(pthread_t) * n_prod);
     if (prod == NULL) return -1;
     conso = malloc(sizeof(pthread_t) * n_conso);
     if (conso == NULL) return -1;
 
-    // Initialize semaphores
+    // Initialize semaphores and mutex
     pthread_mutex_init(&mutex, NULL);
-    sem_init(&empty, 0, BUFFER_SIZE);
+    sem_init(&empty, 0, 8);
     sem_init(&full, 0, 0);
 
-    // Threads for producing
+    // Create th_producer thread
     for (int i = 0; i < n_prod; i++) {
-        pthread_create(&prod[i], NULL, producer, NULL);
+        pthread_create(&prod[i], NULL, th_producer, NULL);
     }
-    // Threads for consuming
+    // Create th_consumer thread
     for (int i = 0; i < n_conso; i++) {
-        pthread_create(&conso[i], NULL, consumer, NULL);
+        pthread_create(&conso[i], NULL, th_consumer, NULL);
     }
 
     // Join threads
