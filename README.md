@@ -2,9 +2,7 @@
 
 ## Partie 1 - TODO
 
--script python : terminer et ajouter les 2 autres programmes
-
--script bash : ajouter et tester lecteurs_ecrivains
+-ajouter analyse au rapport
 
 -graphes : les ajouter au rapport
 
