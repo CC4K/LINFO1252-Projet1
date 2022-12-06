@@ -12,6 +12,9 @@ rw: lecteurs_ecrivains.c
 test: all
 	make all
 	./experiments.sh
+	make clean
+
+plot:
 	./plot.py
 
 clean:
@@ -24,6 +27,7 @@ help:
 	@echo \> 'make pc' \ \  : compile producteurs_consommateurs.c
 	@echo \> 'make rw' \ \  : compile lecteurs_ecrivains.c
 	@echo \> 'make test'\ \ : compile all .c files, fill .csv files with their execution times and remove .o files
+	@echo \> 'make plot'\ \ : create graphs out of the .csv data and save figures as .png
 	@echo \> 'make clean'\ \: remove generated .o files
 
 .PHONY: clean
