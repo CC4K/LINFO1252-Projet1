@@ -1,28 +1,30 @@
-all: philo prod_conso read_write
+all: ph pc rw
 
-philo: philosophes.c
+ph: philosophes.c
 	gcc philosophes.c -lpthread -o philosophes_exe.o
 
-prod_conso: producteurs_consommateurs.c
+pc: producteurs_consommateurs.c
 	gcc producteurs_consommateurs.c -lpthread -o producteurs_consommateurs_exe.o
 
-read_write: lecteurs_ecrivains.c
+rw: lecteurs_ecrivains.c
 	gcc lecteurs_ecrivains.c -lpthread -o lecteurs_ecrivains_exe.o
 
-plot:
-	./testing_script
+test: all
+	make all
+	./experiments.sh
 	./plot.py
+	make clean
 
 clean:
 	rm -rf *.o
 
 help:
-	@echo \> 'make help' \	\  \: shows this list of commands
-	@echo \> 'make all'  \  \  \  \ : compiles all .c files
-	@echo \> 'make philo' \	 \ : compiles philosophes.c
-	@echo \> 'make prod-conso' \: compiles producteurs_consommateurs.c
-	@echo \> 'make read-write'\ : compiles lecteurs_ecrivains.c
-	@echo \> 'make plot'\  \  \  \ : writes programs execution times \in csv files and plots them
-	@echo \> 'make clean'\   \   \  : removes generated object files
+	@echo \> 'make help'\  \: show this list of commands
+	@echo \> 'make (all)'\ \: compile all .c files
+	@echo \> 'make ph' \ \  : compile philosophes.c
+	@echo \> 'make pc' \ \  : compile producteurs_consommateurs.c
+	@echo \> 'make rw' \ \  : compile lecteurs_ecrivains.c
+	@echo \> 'make test'\ \ : compile all .c files, fill .csv files with their execution times and remove object files
+	@echo \> 'make clean'\ \: remove generated object files
 
 .PHONY: clean

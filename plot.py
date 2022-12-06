@@ -16,6 +16,9 @@ def standard_dev(data):
     var = variance(data)
     return np.sqrt(var)
 
+def to_milli(data):
+    return [x/1000 for x in data]
+
 # Extract data
 with open("philosophes.csv", "r") as file:
     reader = csv.reader(file)
@@ -64,7 +67,9 @@ StDev_read_write = [standard_dev(data_read_write[0]), standard_dev(data_read_wri
 
 # Plot
 fig1 = plt.figure()
-plt.errorbar(X, Mean_philo, yerr=StDev_philo, linestyle="solid", linewidth=0.5, ecolor="red", elinewidth=1.5, capsize=20, markersize=8, fmt="o")
+plt.plot(X, to_milli(Mean_philo), "o", color="blue", markersize=5, linestyle="solid", linewidth=0.5)
+plt.errorbar(X, to_milli(Mean_philo), yerr=to_milli(StDev_philo), linestyle="None", ecolor="red", elinewidth=1.5, markersize=0, capsize=10, fmt="o")
+plt.legend(['Moyenne', 'Écart-type'], loc='best')
 plt.xlim(1, 6)
 plt.xticks(np.arange(7), [1, 2, 4, 8, 16, 32, 64])
 plt.xlabel('Nombre de threads')
@@ -74,10 +79,11 @@ plt.ylabel('Temps d\'exécution (sec)')
 plt.title('Moyenne et écart-type du temps d\'exécution\nde philosophes.c en fonction du nombre de threads')
 plt.grid(True)
 plt.savefig("philosophes_performances.png", dpi=1000)
-# plt.show()
 
 fig2 = plt.figure()
-plt.errorbar(X, Mean_prod_conso, yerr=StDev_prod_conso, linestyle="solid", linewidth=0.5, ecolor="red", elinewidth=1.5, capsize=20, markersize=8, fmt="o")
+plt.plot(X, to_milli(Mean_prod_conso), "o", color="blue", markersize=5, linestyle="solid", linewidth=0.5)
+plt.errorbar(X, to_milli(Mean_prod_conso), yerr=to_milli(StDev_prod_conso), linestyle="None", ecolor="red", elinewidth=1.5, markersize=0, capsize=10, fmt="o")
+plt.legend(['Moyenne', 'Écart-type'], loc='best')
 plt.xlim(1, 6)
 plt.xticks(np.arange(7), [1, 2, 4, 8, 16, 32, 64])
 plt.xlabel('Nombre de threads')
@@ -87,10 +93,11 @@ plt.ylabel('Temps d\'exécution (sec)')
 plt.title('Moyenne et écart-type du temps d\'exécution\nde producteurs_consommateurs.c en fonction du nombre de threads')
 plt.grid(True)
 plt.savefig("producteurs_consommateurs_performances.png", dpi=1000)
-# plt.show()
 
 fig3 = plt.figure()
-plt.errorbar(X, Mean_read_write, yerr=StDev_read_write, linestyle="solid", linewidth=0.5, ecolor="red", elinewidth=1.5, capsize=20, markersize=8, fmt="o")
+plt.plot(X, to_milli(Mean_read_write), "o", color="blue", markersize=5, linestyle="solid", linewidth=0.5)
+plt.errorbar(X, to_milli(Mean_read_write), yerr=to_milli(StDev_read_write), linestyle="None", ecolor="red", elinewidth=1.5, markersize=0, capsize=10, fmt="o")
+plt.legend(['Moyenne', 'Écart-type'], loc='best')
 plt.xlim(1, 6)
 plt.xticks(np.arange(7), [1, 2, 4, 8, 16, 32, 64])
 plt.xlabel('Nombre de threads')
