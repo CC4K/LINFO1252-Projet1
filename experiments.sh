@@ -9,21 +9,15 @@ for n in 1 2 4 8 16 32 64; do
 	for i in $(seq 5); do
 		if [ $(($n%2)) -eq 0 ]; then
 		    # si pair
-		    # ts=$(date +%s%N) ; my_command ; tt=$((($(date +%s%N) - $ts)/1000000)) ; echo "Time taken: $tt milliseconds"
 		    tpc_s=$(date +%s%N); ./producteurs_consommateurs_exe.o $n $n; tpc_t=$((($(date +%s%N) - $tpc_s)/1000000))
 		    trw_s=$(date +%s%N); ./lecteurs_ecrivains_exe.o $n $n; trw_t=$((($(date +%s%N) - $trw_s)/1000000))
-			#time_prod_conso=$(/usr/bin/time -f "%e" ./producteurs_consommateurs_exe.o $n $n 2>&1 | tail -n 1)
-			#time_read_write=$(/usr/bin/time -f "%e" ./lecteurs_ecrivains_exe.o $n $n 2>&1 | tail -n 1)
 		else
 		    # si impair
 			m=$(($n+1))
 			tpc_s=$(date +%s%N); ./producteurs_consommateurs_exe.o $n $m; tpc_t=$((($(date +%s%N) - $tpc_s)/1000000))
             trw_s=$(date +%s%N); ./lecteurs_ecrivains_exe.o $m $n; trw_t=$((($(date +%s%N) - $trw_s)/1000000))
-			#time_prod_conso=$(/usr/bin/time -f "%e" ./producteurs_consommateurs_exe.o $n $m 2>&1 | tail -n 1)
-			#time_read_write=$(/usr/bin/time -f "%e" ./lecteurs_ecrivains_exe.o $m $n 2>&1 | tail -n 1)
 		fi
 		tph_s=$(date +%s%N); ./philosophes_exe.o $n; tph_t=$((($(date +%s%N) - $tph_s)/1000000))
-		#time_philo=$(/usr/bin/time -f "%e" ./philosophes_exe.o $n 2>&1 | tail -n 1)
 
 		if [ $i -eq 5 ]; then
             echo $tph_t >> philosophes.csv
@@ -36,4 +30,7 @@ for n in 1 2 4 8 16 32 64; do
         fi
 	done
 done
+cat philosophes.csv
+cat producteurs_consommateurs.csv
+cat lecteurs_ecrivains.csv
 exit 0
