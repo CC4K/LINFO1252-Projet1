@@ -30,7 +30,8 @@ for n in 1 2 4 8 16 32 64; do
         fi
 	done
 done
-cat philosophes.csv
-cat producteurs_consommateurs.csv
-cat lecteurs_ecrivains.csv
+# de-commenter pour voir lire les .csv sur le serveur de test
+#cat philosophes.csv
+#cat producteurs_consommateurs.csv
+#cat lecteurs_ecrivains.csv
 exit 0

@@ -1,68 +1,41 @@
 # LINFO1252-Projet 1
 
-## Partie 1 - TODO
+### Programmation multi-threadée et évaluation de performances
 
--ajouter analyse au rapport
+###
 
--ref csv :
+## Repository content
 
-Philos,1,2,3,4,5
+This is only the first part of the project but it is enough for an interesting analysis of the results.
 
-1,27,27,27,27,28
+The `.c` files are the source files containing the multi-threaded programs we had to evaluate
 
-2,83,84,85,114,94
+`experiments.sh` is a bash script for evaluating the programs. 5 runs are recorded for 1, 2, 4, 8, 16, 32 and 64 threads (off course it means it needs to be run on a 32 core processor machine)
 
-4,414,185,210,242,148
+The `.csv` files contains the data resulting from `experiments.sh`
 
-8,323,324,326,348,423
+`plot.py` is a Python script that will take the data from the `.csv` and plot them into graphs
 
-16,520,510,522,510,472
+The `.png` files are the graphs resulting from `plot.py`
 
-32,712,891,801,792,832
+Finally, the Makefile is where the make commands are (compiling, cleaning and running the scripts) 
 
-64,1552,1539,1576,1536,1508
+## Makefile commands
 
+Here are all the possible commands you can run from the root of the project :
 
-Prod-conso,1,2,3,4,5
+-`make help`: show this list of commands
 
-1,574,524,500,493,483
+-`make (all)`: compile all .c files
 
-2,296,288,292,300,290
+-`make ph`: compile philosophes.c
 
-4,150,132,131,140,163
+-`make pc`: compile producteurs_consommateurs.c
 
-8,89,86,83,71,105
+-`make rw`: compile lecteurs_ecrivains.c
 
-16,53,53,64,59,57
+-`make test`: compile all .c files, fill .csv files with their execution times then clean .o files
 
-32,54,54,57,56,63
+-`make plot`: create graphs out of the .csv data and save figures as .png
 
-64,70,65,65,65,65
-
-
-Lect-ecriv,1,2,3,4,5
-
-1,224,225,218,224,201
-
-2,142,142,134,130,141
-
-4,102,62,91,99,68
-
-8,73,77,70,72,78
-
-16,71,69,73,75,72
-
-32,68,56,72,73,75
-
-64,76,82,77,81,76
-
-
-## Partie 2 - TODO
-
--test-and-set + perf
-
--test-and-test-and-set + perf
-
--interface sémaphore ??? (what)
-
--plus tard mdr
+-`make clean`: remove generated .o files
